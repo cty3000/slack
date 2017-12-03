@@ -21,37 +21,39 @@ app.use('/slack/events', slackEvents.expressMiddleware());
 // Attach listeners to events by Slack Event "type". See: https://api.slack.com/events/message.im
 slackEvents.on('message', (event)=> {
   console.log(event);
-  const postData = querystring.stringify(event);
-  const options = {
-    hostname: process.env.API_HOSTNAME,
-    port: process.env.API_PORT,
-    path: process.env.API_PATH,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Content-Length': Buffer.byteLength(postData)
-    }
-  };
+  if (process.env.API_HOSTNAME && process.env.API_PORT && process.env.API_PATH) {
+    const postData = querystring.stringify(event);
+    const options = {
+      hostname: process.env.API_HOSTNAME,
+      port: process.env.API_PORT,
+      path: process.env.API_PATH,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    };
 
-  const req = http.request(options, (res) => {
-    console.log('***** Response Start *****');
-    console.log(`STATUS: ${res.statusCode}`);
-    console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
-    res.setEncoding('utf8');
-    res.on('data', (chunk) => {
-      console.log(`BODY: ${chunk}`);
+    const req = http.request(options, (res) => {
+      console.log(`STATUS: ${res.statusCode}`);
+      console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
+      res.setEncoding('utf8');
+      res.on('data', (chunk) => {
+        console.log(`BODY: ${chunk}`);
+      });
+      res.on('end', () => {
+        console.log('***** Response  End  *****');
+      });
     });
-    res.on('end', () => {
-      console.log('***** Response  End  *****');
-    });
-  });
 
-  req.on('error', (e) => {
-    console.error(`problem with request: ${e.message}`);
-  });
-  // write data to request body
-  req.write(postData);
-  req.end();
+    req.on('error', (e) => {
+      console.error(`problem with request: ${e.message}`);
+    });
+    // write data to request body
+    console.log('***** Request Start *****');
+    req.write(postData);
+    req.end();
+  }
 });
 
 // Handle errors (see `errorCodes` export)
