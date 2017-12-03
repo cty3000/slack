@@ -3,6 +3,7 @@ const http = require('http');
 // Initialize an Express application
 const express = require('express');
 const bodyParser = require('body-parser');
+const querystring = require('querystring');
 
 // Initialize using verification token from environment variables
 const createSlackEventAdapter = require('@slack/events-api').createSlackEventAdapter;
